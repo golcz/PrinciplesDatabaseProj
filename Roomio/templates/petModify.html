@@ -1,0 +1,29 @@
+<html>
+<head>
+</head>
+<body>
+
+
+<form action="/petModifyForm" method="POST">
+	Please, enter the name and the type of the pet, whose records you want to modify: </br>
+	<input type="text" name = "oldPetName" placeholder="Pet Name" required/> </br>
+	<input type="text" name = "oldPetType" placeholder="Pet Type" required/> </br>
+
+	Please, enter the new information for this pet: </br>
+
+	<input type="text" name = "newPetName" placeholder="New Pet Name" required/> </br>
+	<input type="text" name = "newPetType" placeholder="New Pet Type" required/> </br>	
+	<input type="text" name = "newPetSize" placeholder="New Pet Size" required/> </br>
+
+	<input type="submit" value = "Submit"/>
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+
+</form>
+
+
+</body>
+
+
+</html>

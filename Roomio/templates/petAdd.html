@@ -1,0 +1,21 @@
+<html>
+<head>
+</head>
+<body>
+
+
+<form action="/petAddForm" method="POST">
+	<input type="text" name = "petName" placeholder="Pet Name" required/> </br>
+	<input type="text" name = "petType" placeholder="Pet Type" required/> </br>
+	<input type="text" name = "petSize" placeholder="Pet Size" required/> </br>
+	<input type="submit" value = "Register Pet"/>
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+</form>
+
+
+</body>
+
+
+</html>
