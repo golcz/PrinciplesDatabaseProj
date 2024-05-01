@@ -9,6 +9,13 @@ table, th, td{
 }
 </style>
 
+
+{% if not(pets) %}
+
+You currently have no pets! Add a pet! <br>
+
+{% else %}
+
 This is your list of pets:
 
 <table>
@@ -25,17 +32,20 @@ This is your list of pets:
 {% endfor %}
 </table>
 
+{% endif %}
 
 What would you like to do?
 <br>
 
 <a href="/petAdd">Add a new pet</a>
 <br>
+{% if pets %}
 <a href="/petModify">Modify information on the existing pet</a>
 <br>
+{% endif %}
 
-
-<a href="/">Go back</a>
+<a href="/home">Go home</a>
+<br>
 
 </body>
 

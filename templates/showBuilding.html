@@ -18,6 +18,10 @@ Here is the general information about this building: <br><br>
 
 <br>
 
+{% if not(pets) %}
+
+{% else %}
+
 This building has the following pet policy with respect to your pets: <br><br>
 
 <table>
@@ -41,6 +45,9 @@ This building has the following pet policy with respect to your pets: <br><br>
 {% endfor %}
 </table>
 <br><br>
+
+{% endif %}
+
 Here is a list of available units in this building. Choose a unit and click "Search Unit" to get more information about the unit, view, or post interest. 
 <br><br>
 

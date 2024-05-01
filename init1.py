@@ -4,13 +4,12 @@ import pymysql.cursors
 import secrets
 import hashlib
 
-from app import app
 #from flask import Flask, flash, request, redirect, render_template
 from werkzeug.utils import secure_filename
 
-###Initialize the app from Flask
-##app = Flask(__name__)
-##app.secret_key = "secret key"
+
+app = Flask(__name__)
+app.secret_key = 'some key that you will never guess'
 
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
@@ -25,21 +24,39 @@ conn = pymysql.connect(host='localhost',
 #Define a route to hello function
 @app.route('/')
 def hello():
+    if('username' in session):
+        return redirect(url_for('home'))
     return render_template('index.html')
 
 #Define route for login
 @app.route('/login')
 def login():
+    if('username' in session):
+        return redirect(url_for('home'))
     return render_template('login.html')
+
+#Define route for home
+@app.route('/home')
+def home():
+    if(not('username' in session)):
+        return redirect(url_for('hello'))
+    return render_template('home.html', username = session['username'])
+
 
 #Define route for register
 @app.route('/register')
 def register():
+    if('username' in session):
+        return redirect(url_for('home'))
     return render_template('register.html')
 
 #Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])
 def loginAuth():
+
+    if('username' in session):
+        return redirect(url_for('home'))
+
     #grabs information from the forms
     username = request.form['username']
     password = request.form['password']
@@ -79,6 +96,11 @@ def loginAuth():
 #Authenticates the register
 @app.route('/registerAuth', methods=['GET', 'POST'])
 def registerAuth():
+
+    if('username' in session):
+        return redirect(url_for('home'))
+
+
     #grabs information from the forms
     username = request.form['username']
     first_name = request.form['first_name']
@@ -125,21 +147,24 @@ def registerAuth():
         return render_template('index.html')
 
 
-@app.route('/home')
-def home():
-    return render_template('home.html', username = session['username'])
-
 @app.route('/logout')
 def logout():
+    if(not('username' in session)):
+        return redirect(url_for('home'))
     session.pop('username')
     return redirect('/')
 
 @app.route('/searchBuilding')
 def searchBuilding():
+    if(not('username' in session)):
+        return redirect(url_for('home'))
     return render_template('searchBuilding.html')
 
 @app.route('/searchBuildingForm',  methods=['GET', 'POST'])
 def searchBuildingForm():
+
+    if(not('username' in session)):
+        return redirect(url_for('home'))
 
     building = request.form['building']
     company = request.form['company']
@@ -179,6 +204,10 @@ def searchBuildingForm():
 
 @app.route('/searchUnit', methods=['GET', 'POST'])
 def searchUnit():
+
+    if(not('username' in session)):
+        return redirect(url_for('home'))
+
     city = request.form['city']
     unitID = request.form['unit']
 
@@ -211,6 +240,9 @@ def searchUnit():
 @app.route('/postInterest', methods=['GET', 'POST'])
 def postInterest():
 
+    if(not('username' in session)):
+        return redirect(url_for('home'))
+
     count = request.form['count']
     date = request.form['date']
     unit = request.form['unit']
@@ -227,6 +259,9 @@ def postInterest():
 @app.route('/postComment', methods=['GET', 'POST'])
 def postComment():
 
+    if(not('username' in session)):
+        return redirect(url_for('home'))
+
     rating = request.form['rating']
     comment = request.form['comment']
     unit = request.form['unit']
@@ -242,6 +277,10 @@ def postComment():
 
 @app.route('/pet')
 def pet():
+
+    if(not('username' in session)):
+        return redirect(url_for('home'))
+
     cursor = conn.cursor();
     query = 'SELECT petName, petType, petSize FROM Pets WHERE username = %s'
     cursor.execute(query, session["username"])
@@ -253,10 +292,18 @@ def pet():
 
 @app.route('/petAdd')
 def petAdd():
+
+    if(not('username' in session)):
+        return redirect(url_for('home'))
+
     return render_template('petAdd.html')
 
 @app.route('/petAddForm', methods=['GET', 'POST'])
 def petAddForm():
+
+    if(not('username' in session)):
+        return redirect(url_for('home'))
+
     petName = request.form['petName']
     petType = request.form['petType']
     petSize = request.form['petSize']
@@ -283,10 +330,17 @@ def petAddForm():
 @app.route('/petModify')
 def petModify():
 
+    if(not('username' in session)):
+        return redirect(url_for('home'))
+
     return render_template('petModify.html')
 
 @app.route('/petModifyForm', methods=['GET', 'POST'])
 def petSelectForm():
+
+
+    if(not('username' in session)):
+        return redirect(url_for('home'))
 
     oldPetName = request.form['oldPetName']
     oldPetType = request.form['oldPetType']
@@ -325,7 +379,6 @@ def petSelectForm():
 
     return render_template('home.html', username = session['username'])
         
-app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000
 #debug = True -> you don't have to restart flask
 #for changes to go through, TURN OFF FOR PRODUCTION

@@ -3,16 +3,28 @@
 </head>
 <body>
 
+<style type="text/css">
+	table, th, td{
+		border: 1px solid black;
+	}
+</style>
+
 Here is the information about this unit: <br><br>
 
 <b>Unit Number</b> {{unit.unitNumber}} <br>
 <b>Monthly Rent</b> {{unit.monthlyRent}} <br>
-<b>Monthly Rent for Similar Housing in the same City</b> {{avg.num}} <br>
+<b>Avergae Monthly Rent for Similar Housing in the Same City</b> {{avg.num}} <br>
 <b>Square Footage</b> {{unit.squareFootage}} <br>
 <b>Available Move-in Date:</b> {{unit.availableDateForMoveIn}} <br>
 <b>Number of Rooms:</b> {{rooms.count}} <br>
 <br>
 
+
+{% if not(interest) %} 
+
+There are currently no posted interests in this unit. Be the first one!
+
+{% else %} 
 
 Current <b>interests</b> on this unit:
 
@@ -31,11 +43,14 @@ Current <b>interests</b> on this unit:
 </form>
 </table><br>
 
+{% endif %}
+
 <form action='/postInterest' method="POST">
 	Would you like to post an interest in this unit? <br>
 	<input type="hidden" value={{unit.unitRentID}} name="unit" />
-	<input type="number" name = "count" placeholder="Desired Roommate Count" required/> </br>
-	<input type="date" name = "date" placeholder="Desired Move-in Date" required/> </br>
+	<input type="number" name = "count" placeholder="Desired Roommate Count" required/> <br>
+	Desired Move-in Date: <br>
+	<input type="date" name = "date" placeholder="Desired Move-in Date" required/> <br>
 	<input type="submit" value="Post Interest">
 </form>
 
@@ -68,6 +83,9 @@ There are currently no comments about this unit! Leave a comment! <br><bt>
 	<input type="text" name = "comment" placeholder="Your Comment" required/> </br>
 	<input type="submit" value="Post Comment">
 </form>
+
+<a href="/home">Go Home</a>
+<br>
 
 
 </body>
