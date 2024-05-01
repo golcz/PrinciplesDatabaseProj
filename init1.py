@@ -70,7 +70,7 @@ def loginAuth():
         #session is a built in
         session['username'] = username
         #return redirect(url_for('home'))
-        return redirect(url_for('home'))
+        return render_template('home.html', username = session['username'])
     else:
         #returns an error message to the html page
         error = 'Invalid login or username'
@@ -115,6 +115,7 @@ def registerAuth():
     if(data):
         #If the previous query returns data, then user exists
         error = "This user already exists"
+        cursor.close()
         return render_template('register.html', error = error)
     else:
         ins = 'INSERT INTO users VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
@@ -126,14 +127,205 @@ def registerAuth():
 
 @app.route('/home')
 def home():
-    return render_template('home.html')
+    return render_template('home.html', username = session['username'])
 
-app.route('/logout')
+@app.route('/logout')
 def logout():
     session.pop('username')
     return redirect('/')
+
+@app.route('/searchBuilding')
+def searchBuilding():
+    return render_template('searchBuilding.html')
+
+@app.route('/searchBuildingForm',  methods=['GET', 'POST'])
+def searchBuildingForm():
+
+    building = request.form['building']
+    company = request.form['company']
+    
+    cursor = conn.cursor();
+    query = 'SELECT unitRentID, unitNumber, monthlyRent, squareFootage, availableDateForMoveIn \
+    FROM Apartmentunit WHERE companyName = %s AND buildingName = %s'
+    cursor.execute(query, (company, building))
+    data = cursor.fetchall()
+
+    if(not(data)):
+        error = "No such building!"
+        render_template('searchUnits.html', error = error)
+
+
+    query = 'SELECT aType FROM Provides WHERE companyName = %s AND buildingName = %s'
+    cursor.execute(query, (company, building))
+    amen = cursor.fetchall()
+
+    query = 'SELECT COUNT(unitRentID) AS count \
+    FROM Apartmentunit WHERE companyName = %s AND buildingName = %s'
+    cursor.execute(query, (company, building))
+    numUnit = cursor.fetchone()
+
+    query = 'SELECT petName, isAllowed, registrationFee, monthlyFee FROM Pets NATURAL JOIN Petpolicy WHERE companyName = %s AND buildingName = %s\
+    AND username = %s'
+    cursor.execute(query, (company, building, session["username"]))
+    pets = cursor.fetchall()
+
+    query = 'SELECT buildingName, companyName, addrNum, addrStreet, addrCity, addrState, addrZipCode, yearBuilt \
+    FROM ApartmentBuilding WHERE companyName = %s AND buildingName = %s'
+    cursor.execute(query, (company, building))
+    build = cursor.fetchone()
+
+    cursor.close()
+    return render_template('showBuilding.html', amen = amen, numUnit = numUnit, build = build, units=data, pets=pets)
+
+@app.route('/searchUnit', methods=['GET', 'POST'])
+def searchUnit():
+    city = request.form['city']
+    unitID = request.form['unit']
+
+    cursor = conn.cursor();
+    query = 'SELECT unitRentID, companyName, buildingName, unitNumber, monthlyRent, squareFootage, availableDateForMoveIn \
+    FROM Apartmentunit WHERE unitRentID = %s'
+    cursor.execute(query, unitID)
+    data = cursor.fetchone()
+
+    query = 'SELECT COUNT(name) as count FROM Rooms WHERE unitRentID = %s'
+    cursor.execute(query, unitID)
+    rooms = cursor.fetchone()
+
+    query = 'SELECT username, roommateCnt, moveInDate FROM Interests WHERE unitRentID = %s'
+    cursor.execute(query, unitID)
+    interest = cursor.fetchall()
+
+    query = 'SELECT username, rating, comment FROM Comments WHERE unitRentId = %s'
+    cursor.execute(query, unitID)
+    comments = cursor.fetchall()
+
+    query = 'SELECT AVG(monthlyRent) as num FROM Apartmentunit NATURAL JOIN ApartmentBuilding WHERE squareFootage/1.1<%s AND squareFootage/0.9>%s AND addrCIty = %s'
+    cursor.execute(query,(data['squareFootage'],data['squareFootage'],city))
+    avg = cursor.fetchone()
+
+    cursor.close()
+    return render_template('showUnit.html', unit = data, rooms = rooms, interest = interest, comments = comments, avg = avg )
+
+
+@app.route('/postInterest', methods=['GET', 'POST'])
+def postInterest():
+
+    count = request.form['count']
+    date = request.form['date']
+    unit = request.form['unit']
+
+    cursor = conn.cursor();
+    query = 'INSERT INTO interests VALUES(%s, %s, %s, %s)'
+    cursor.execute(query, (session["username"], unit, count, date))
+    conn.commit()
+    cursor.close()
+
+    return render_template('home.html', username = session['username'])
+
+
+@app.route('/postComment', methods=['GET', 'POST'])
+def postComment():
+
+    rating = request.form['rating']
+    comment = request.form['comment']
+    unit = request.form['unit']
+
+    cursor = conn.cursor();
+    query = 'INSERT INTO Comments VALUES(%s, %s, %s, %s, %s)'
+    cursor.execute(query, (None, unit, session["username"], rating, comment))
+    conn.commit()
+    cursor.close()
+
+    return render_template('home.html', username = session['username'])
+
+
+@app.route('/pet')
+def pet():
+    cursor = conn.cursor();
+    query = 'SELECT petName, petType, petSize FROM Pets WHERE username = %s'
+    cursor.execute(query, session["username"])
+    data = cursor.fetchall()
+    cursor.close()
+
+    return render_template('pet.html', pets = data)
+
+
+@app.route('/petAdd')
+def petAdd():
+    return render_template('petAdd.html')
+
+@app.route('/petAddForm', methods=['GET', 'POST'])
+def petAddForm():
+    petName = request.form['petName']
+    petType = request.form['petType']
+    petSize = request.form['petSize']
+
+    cursor = conn.cursor();
+    query = 'SELECT * FROM Pets WHERE petName = %s AND petType = %s AND username = %s'
+    cursor.execute(query, (petName, petType, session["username"]))
+    data = cursor.fetchone()
+
+    error = None
+    if(data):
+        error = "You already have a pet with this name and type"
+        cursor.close()
+        return render_template('petAdd.html', error = error)
+    else:
+        query = 'INSERT INTO Pets VALUES(%s, %s, %s, %s)'
+        cursor.execute(query, (petName, petType, petSize, session["username"]))
+        conn.commit()
+
+        cursor.close()
+        return render_template('home.html', username = session['username'])
+
+
+@app.route('/petModify')
+def petModify():
+
+    return render_template('petModify.html')
+
+@app.route('/petModifyForm', methods=['GET', 'POST'])
+def petSelectForm():
+
+    oldPetName = request.form['oldPetName']
+    oldPetType = request.form['oldPetType']
+
+    newPetName = request.form['newPetName']
+    newPetType = request.form['newPetType']
+    newPetSize = request.form['newPetSize']
+
+
+    cursor = conn.cursor();
+    query = 'SELECT * FROM Pets WHERE petName = %s AND petType = %s AND username = %s'
+    cursor.execute(query, (oldPetName, oldPetType, session["username"]))
+    data = cursor.fetchone()
+
+    if(not(data)):
+        error = "Pet not found"
+        cursor.close()
+        return render_template('petModify.html', error = error)
+    
+    if(oldPetName != newPetName or oldPetType != newPetType):
+        cursor = conn.cursor();
+        query = 'SELECT * FROM Pets WHERE petName = %s AND petType = %s AND username = %s'
+        cursor.execute(query, (newPetName, newPetType, session["username"]))
+        data = cursor.fetchone()
+        if(data):
+            error = "Another pet with the newly speicfied name and type already exists"
+            cursor.close()
+            return render_template('petModify.html', error = error)
+
+
+    cursor = conn.cursor();
+    query = 'UPDATE Pets SET petName = %s, petType = %s, petSize = %s WHERE petName = %s AND petType = %s AND username = %s'
+    cursor.execute(query, (newPetName, newPetType, newPetSize, oldPetName, oldPetType, session["username"]))
+    conn.commit()
+    cursor.close()
+
+    return render_template('home.html', username = session['username'])
         
-#app.secret_key = 'some key that you will never guess'
+app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000
 #debug = True -> you don't have to restart flask
 #for changes to go through, TURN OFF FOR PRODUCTION

@@ -1,0 +1,43 @@
+<html>
+<head>
+</head>
+<body>
+
+<style type="text/css">
+table, th, td{
+	border: 1px solid black;
+}
+</style>
+
+This is your list of pets:
+
+<table>
+	<th>Pet Name&emsp;</th>
+	<th>Type&emsp;</th>
+	<th>Size&emsp;</th>
+
+{% for line in pets %}
+	<tr>
+		<td>{{line.petName}}</td>
+		<td>{{line.petType}}</td>
+		<td>{{line.petSize}}</td>
+	</tr>
+{% endfor %}
+</table>
+
+
+What would you like to do?
+<br>
+
+<a href="/petAdd">Add a new pet</a>
+<br>
+<a href="/petModify">Modify information on the existing pet</a>
+<br>
+
+
+<a href="/">Go back</a>
+
+</body>
+
+
+</html>

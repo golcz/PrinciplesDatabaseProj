@@ -3,15 +3,16 @@
 </head>
 <body>
 <form action="/registerAuth" method="POST">
-	<input type="text" name = "username" placeholder="username" required/> </br>
+	<input type="text" name = "username" placeholder="Username" required/> </br>
 	<input type="text" name = "first_name" placeholder="First Name" required/> </br>
 	<input type="text" name = "last_name" placeholder="Last Name" required/> </br>
+	Date of Birth: </br>
 	<input type="date" name = "DOB" placeholder="Date of Birth" required/> </br>
 	<input type="radio" name="gender" value="male" checked> Male
 	<input type="radio" name="gender" value="female"> Female </br>
 	<input type="text" name = "email" placeholder="Email" required/> </br>
 	<input type="text" name = "Phone" placeholder="Phone" required/> </br>
-	<input type="password" name = "passwd" placeholder="password" required/></br>
+	<input type="password" name = "passwd" placeholder="Password" required/></br>
 	<input type="submit" value = Register />
 	{% if error %}
 		<p class="error"><strong>Error:</strong> {{error}}</p>

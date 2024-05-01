@@ -1,0 +1,76 @@
+<html>
+<head>
+</head>
+<body>
+
+Here is the information about this unit: <br><br>
+
+<b>Unit Number</b> {{unit.unitNumber}} <br>
+<b>Monthly Rent</b> {{unit.monthlyRent}} <br>
+<b>Monthly Rent for Similar Housing in the same City</b> {{avg.num}} <br>
+<b>Square Footage</b> {{unit.squareFootage}} <br>
+<b>Available Move-in Date:</b> {{unit.availableDateForMoveIn}} <br>
+<b>Number of Rooms:</b> {{rooms.count}} <br>
+<br>
+
+
+Current <b>interests</b> on this unit:
+
+<table>
+	<th>User&emsp;</th>
+	<th>Desired Roommate Count&emsp;</th>
+	<th>Desired Move-in Date&emsp;</th>
+
+{% for line in interest %}
+	<tr>
+		<td>{{line.username}}</td>
+		<td>{{line.roommateCnt}}</td>
+		<td>{{line.moveInDate}}</td>
+	</tr>
+{% endfor %}
+</form>
+</table><br>
+
+<form action='/postInterest' method="POST">
+	Would you like to post an interest in this unit? <br>
+	<input type="hidden" value={{unit.unitRentID}} name="unit" />
+	<input type="number" name = "count" placeholder="Desired Roommate Count" required/> </br>
+	<input type="date" name = "date" placeholder="Desired Move-in Date" required/> </br>
+	<input type="submit" value="Post Interest">
+</form>
+
+
+<b>Comments</b> about this unit: <br>
+
+{% if not(comments) %} 
+There are currently no comments about this unit! Leave a comment! <br><bt>
+{% else %} 
+<table>
+	<th>User&emsp;</th>
+	<th>Rating &emsp;</th>
+	<th>Comment&emsp;</th>
+	
+{% for line in comments %}
+	<tr>
+		<td>{{line.username}}</td>
+		<td>{{line.rating}}</td>
+		<td>{{line.comment}}</td>
+	</tr>
+{% endfor %}
+</form>
+</table><br><br>
+{% endif %}
+
+<form action='/postComment' method="POST">
+	Would you like to leave a comment about this unit? <br>
+	<input type="hidden" value={{unit.unitRentID}} name="unit" />
+	<input type="number" name = "rating" placeholder="Rating" required/> </br>
+	<input type="text" name = "comment" placeholder="Your Comment" required/> </br>
+	<input type="submit" value="Post Comment">
+</form>
+
+
+</body>
+
+
+</html>
