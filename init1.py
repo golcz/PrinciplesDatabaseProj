@@ -67,21 +67,27 @@ def loginAuth():
     cursor.execute(query, username)
     salt = cursor.fetchone()
 
-    m = hashlib.sha256()
-    m.update(password.encode())
-    m.update(str(salt["salt"]).encode())
-    password = m.hexdigest()
+    if(salt):
+        m = hashlib.sha256()
+        m.update(password.encode())
+        m.update(str(salt["salt"]).encode())
+        password = m.hexdigest()
 
-    #cursor used to send queries
-    cursor = conn.cursor()
-    #executes query
-    query = 'SELECT * FROM users WHERE username = %s and passwd = %s'
-    cursor.execute(query, (username, password))
-    #stores the results in a variable
-    data = cursor.fetchone()
-    #use fetchall() if you are expecting more than 1 data row
-    cursor.close()
-    error = None
+        #cursor used to send queries
+        cursor = conn.cursor()
+        #executes query
+        query = 'SELECT * FROM users WHERE username = %s and passwd = %s'
+        cursor.execute(query, (username, password))
+        #stores the results in a variable
+        data = cursor.fetchone()
+        #use fetchall() if you are expecting more than 1 data row
+        cursor.close()
+        error = None
+
+    else:
+        error = 'Invalid login or username'
+        return render_template('login.html', error=error)
+
     if(data):
         #creates a session for the the user
         #session is a built in
